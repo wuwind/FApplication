@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\raw\\test_cbr.mp3",
+        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\res\\raw\\test_cbr.mp3"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\raw\\libarm.so",
+        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\FApplication\\vitamiolibrary\\unspecified\\res\\raw\\libarm.so"
+    }
+]

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/questionBtn"
+            style="@style/TextNextStyle"
+            android:drawableLeft="@drawable/icon_center_question"
+            android:text="常见问题" />
+
+        <View style="@style/LineThinStyle" />
+
+        <TextView
+            android:id="@+id/connectBtn"
+            style="@style/TextNextStyle"
+            android:drawableLeft="@drawable/settings_person"
+            android:text="联系客服" />
+
+
+        <View style="@style/LineThickStyle" />
+
+        <TextView
+            android:id="@+id/messgaeBtn"
+            style="@style/TextNextStyle"
+            android:drawableLeft="@drawable/icon_center_messge"
+            android:text="意见反馈" />
+
+
+        <View style="@style/LineThinStyle" />
+
+        <TextView
+            android:id="@+id/protocalBtn"
+            style="@style/TextNextStyle"
+            android:drawableLeft="@drawable/icon_center_protocal"
+            android:text="用户协议" />
+
+        <View style="@style/LineThinStyle" />
+
+
+        <TextView
+            android:id="@+id/aboutBtn"
+            style="@style/TextNextStyle"
+            android:drawableLeft="@drawable/icon_center_notice"
+            android:text="关于我们" />
+
+        <View
+            style="@style/LineThickStyle"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</ScrollView>
