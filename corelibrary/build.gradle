@@ -50,7 +50,7 @@ dependencies {
 
 def siteUrl = 'https://github.com/wuwind/FApplication'   // 项目的主页
 def gitUrl = 'git@github.com:wuwind/FApplication.git'   // Git仓库的url
-group = "com.wind.corelibrary"            // Maven Group ID for the artifact，一般填你唯一的包名
+group = "com.wuwind.corelibrary"            // Maven Group ID for the artifact，一般填你唯一的包名
 install {
     repositories.mavenInstaller {
         // This generates POM.xml with proper parameters
