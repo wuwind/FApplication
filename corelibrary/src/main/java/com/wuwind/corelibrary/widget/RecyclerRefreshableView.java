@@ -397,7 +397,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
      * 正在刷新的任务，在此任务中会去回调注册进来的下拉刷新监听器。
      */
     class RefreshingTask extends AsyncTask<Void, Integer, Void> {
-
         @Override
         protected Void doInBackground(Void... params) {
             int topMargin = headerLayoutParams.topMargin;
@@ -433,6 +432,40 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     finishRefreshing();
                 }
             }, 2000);
+        }
+    }
+
+    /**
+     * 隐藏下拉头的任务，当未进行下拉刷新或下拉刷新完成后，此任务将会使下拉头重新隐藏。
+     */
+    class HideHeaderTask extends AsyncTask<Void, Integer, Integer> {
+
+        @Override
+        protected Integer doInBackground(Void... params) {
+            int topMargin = headerLayoutParams.topMargin;
+            while (true) {
+                topMargin = topMargin + SCROLL_SPEED;
+                if (topMargin <= hideHeaderHeight) {
+                    topMargin = hideHeaderHeight;
+                    break;
+                }
+                publishProgress(topMargin);
+                SystemClock.sleep(10);
+            }
+            return topMargin;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... topMargin) {
+            headerLayoutParams.topMargin = topMargin[0];
+            header.setLayoutParams(headerLayoutParams);
+        }
+
+        @Override
+        protected void onPostExecute(Integer topMargin) {
+            headerLayoutParams.topMargin = topMargin;
+            header.setLayoutParams(headerLayoutParams);
+            currentStatus = STATUS_NORMAL;
         }
     }
 
@@ -481,42 +514,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
         }
     }
 
-    /**
-     * 隐藏下拉头的任务，当未进行下拉刷新或下拉刷新完成后，此任务将会使下拉头重新隐藏。
-     */
-    class HideHeaderTask extends AsyncTask<Void, Integer, Integer> {
-
-        @Override
-        protected Integer doInBackground(Void... params) {
-            int topMargin = headerLayoutParams.topMargin;
-            while (true) {
-                topMargin = topMargin + SCROLL_SPEED;
-                if (topMargin <= hideHeaderHeight) {
-                    topMargin = hideHeaderHeight;
-                    break;
-                }
-                publishProgress(topMargin);
-                SystemClock.sleep(10);
-            }
-            return topMargin;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... topMargin) {
-            headerLayoutParams.topMargin = topMargin[0];
-            header.setLayoutParams(headerLayoutParams);
-        }
-
-        @Override
-        protected void onPostExecute(Integer topMargin) {
-            headerLayoutParams.topMargin = topMargin;
-            header.setLayoutParams(headerLayoutParams);
-            currentStatus = STATUS_NORMAL;
-        }
-    }
-
     class HideFooterTask extends AsyncTask<Void, Integer, Integer> {
-
         @Override
         protected Integer doInBackground(Void... params) {
             int bottomMargin = footerLayoutParams.bottomMargin;
