@@ -36,10 +36,13 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
 
     public static final int STATUS_REFRESH_FINISHED = 3;//刷新完成或未刷新状态
 
-    //    public static final int STATUS_LOADING = 4;//刷新完成或未刷新状态
     public static final int STATUS_RELEASE_TO_LOAD = 4;//刷新完成或未刷新状态
 
     public static final int STATUS_LOAD_FINISHED = 5;//刷新完成或未刷新状态
+
+    public static final int STATUS_LOADING = 6;//刷新完成或未刷新状态
+
+    public static final int STATUS_PULL_TO_LOAD= 7;//刷新完成或未刷新状态
 
     public static final int SCROLL_SPEED = -20;//下拉头部回滚的速度
 
@@ -171,13 +174,13 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                         if (footerLayoutParams.bottomMargin > 0) {
                             currentStatus = STATUS_RELEASE_TO_LOAD;
                         } else {
-                            currentStatus = STATUS_PULL_TO_REFRESH;
+                            currentStatus = STATUS_PULL_TO_LOAD;
                         }
                         footerLayoutParams.bottomMargin = footerHeight - distance;
                         footer.setLayoutParams(footerLayoutParams);
                         recyclerViewParams.topMargin = (distance);
                         recyclerView.setLayoutParams(recyclerViewParams);
-                        LogUtil.e("distance:"+distance);
+                        LogUtil.e("distance:" + distance);
                         break;
                     }
                     //下拉  刷新
@@ -207,7 +210,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                         case STATUS_RELEASE_TO_LOAD:
                             new LoadingTask().execute();
                             break;
-                        case STATUS_LOAD_FINISHED:
+                        case STATUS_PULL_TO_LOAD:
                             new HideFooterTask().execute();
                             break;
                     }
