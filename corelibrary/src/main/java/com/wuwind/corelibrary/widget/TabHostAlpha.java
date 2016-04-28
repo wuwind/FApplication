@@ -13,7 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.wuwind.corelibrary.R;
-import com.wuwind.corelibrary.utils.LogUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,12 +130,10 @@ public class TabHostAlpha extends FrameLayout {
         tabViews.get(selectedIndex).setAlpha(disAlpha);
         if ((position + percent) > selectedIndex) {
             //左滑
-            LogUtil.e(3,"左滑");
             tabViews.get(selectedIndex + 1).setAlpha(appearAlpha);
             tabViews.get(selectedIndex + 1).setSelected(true);
         } else if((position + percent) < selectedIndex) {
             //右滑
-            LogUtil.e(3,"右滑");
             tabViews.get(selectedIndex - 1).setAlpha(appearAlpha);
             tabViews.get(selectedIndex - 1).setSelected(true);
         }

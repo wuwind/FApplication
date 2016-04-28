@@ -7,8 +7,24 @@ import android.util.Log;
  */
 public class LogUtil {
 
-    public static boolean isDbug = true;
-    public static int debugIDs[] = new int[]{0,1,2, 3};//
+    private static boolean isDbug = false;
+    private static int[] debugIDs = new int[]{0};//
+
+    public static void setDebug(boolean isdbug) {
+        isDbug = isdbug;
+    }
+
+    public static void setDebugIDs(int[] debugIds ) {
+        debugIDs = debugIds;
+    }
+
+    public static void e(double content) {
+        e(0, content+"");
+    }
+
+    public static void e(String content) {
+        e(0, content);
+    }
 
     public static void e(int id, double content) {
         e(id,"", content+"");

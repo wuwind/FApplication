@@ -20,12 +20,12 @@
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\drawable\\abc_dialog_material_background_light.xml"
     },
     {
-        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\scrubber_control_selector_holo.xml",
-        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\FApplication\\vitamiolibrary\\unspecified\\res\\drawable\\scrubber_control_selector_holo.xml"
-    },
-    {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\abc_btn_borderless_material.xml",
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\drawable\\abc_btn_borderless_material.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\scrubber_control_selector_holo.xml",
+        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\FApplication\\vitamiolibrary\\unspecified\\res\\drawable\\scrubber_control_selector_holo.xml"
     },
     {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\abc_ic_clear_material.xml",
@@ -144,12 +144,12 @@
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\drawable\\abc_ic_menu_overflow_material.xml"
     },
     {
-        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\abc_text_cursor_material.xml",
-        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\drawable\\abc_text_cursor_material.xml"
-    },
-    {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\abc_tab_indicator_material.xml",
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\drawable\\abc_tab_indicator_material.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\abc_text_cursor_material.xml",
+        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\drawable\\abc_text_cursor_material.xml"
     },
     {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\drawable\\abc_dialog_material_background_dark.xml",

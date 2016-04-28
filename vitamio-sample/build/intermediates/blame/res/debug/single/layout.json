@@ -76,12 +76,12 @@
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\layout\\abc_action_mode_bar.xml"
     },
     {
-        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\mediaplayer_1.xml",
-        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\res\\layout\\mediaplayer_1.xml"
-    },
-    {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\abc_action_mode_close_item_material.xml",
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\layout\\abc_action_mode_close_item_material.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\mediaplayer_1.xml",
+        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\res\\layout\\mediaplayer_1.xml"
     },
     {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\abc_dialog_title_material.xml",
@@ -160,12 +160,12 @@
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\23.2.0\\res\\layout\\abc_list_menu_item_layout.xml"
     },
     {
-        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\media_metadata.xml",
-        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\res\\layout\\media_metadata.xml"
-    },
-    {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\subtitle2.xml",
         "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\res\\layout\\subtitle2.xml"
+    },
+    {
+        "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\media_metadata.xml",
+        "source": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\res\\layout\\media_metadata.xml"
     },
     {
         "merged": "D:\\AndroidStudioProjects\\FApplication\\vitamio-sample\\build\\intermediates\\res\\merged\\debug\\layout\\notification_template_big_media_narrow.xml",
