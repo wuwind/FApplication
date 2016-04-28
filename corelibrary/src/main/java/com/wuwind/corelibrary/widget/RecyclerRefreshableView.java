@@ -34,7 +34,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
 
     public static final int STATUS_REFRESHING = 2;//正在刷新状态
 
-    public static final int STATUS_REFRESH_FINISHED = 3;//刷新完成或未刷新状态
+    public static final int STATUS_NORMAL = 3;//刷新完成或未刷新状态
 
     public static final int STATUS_RELEASE_TO_LOAD = 4;//刷新完成或未刷新状态
 
@@ -83,9 +83,9 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
 
     /**
      * 当前处理什么状态，可选值有STATUS_PULL_TO_REFRESH, STATUS_RELEASE_TO_REFRESH,
-     * STATUS_REFRESHING 和 STATUS_REFRESH_FINISHED
+     * STATUS_REFRESHING 和 STATUS_NORMAL
      */
-    private int currentStatus = STATUS_REFRESH_FINISHED;
+    private int currentStatus = STATUS_NORMAL;
 
     private int lastStatus = currentStatus;//记录上一次的状态是什么，避免进行重复操作
 
@@ -170,7 +170,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     // 上滑  加载
                     if (distance <= 0) {
                         // 通过偏移下拉头的topMargin值，来实现下拉效果
-                        LogUtil.e("上滑  加载");
+//                        LogUtil.e("上滑  加载");
                         if (footerLayoutParams.bottomMargin > 0) {
                             currentStatus = STATUS_RELEASE_TO_LOAD;
                         } else {
@@ -184,7 +184,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                         break;
                     }
                     //下拉  刷新
-                    LogUtil.e("下拉  刷新");
+//                    LogUtil.e("下拉  刷新");
                     if (currentStatus != STATUS_REFRESHING) {
                         if (headerLayoutParams.topMargin > 0) {
                             currentStatus = STATUS_RELEASE_TO_REFRESH;
@@ -251,7 +251,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
      * 当所有的刷新逻辑完成后，记录调用一下，否则你的RecyclerView将一直处于正在刷新状态。
      */
     public void finishRefreshing() {
-        currentStatus = STATUS_REFRESH_FINISHED;
+        currentStatus = STATUS_NORMAL;
 //		preferences.edit().putLong(UPDATED_AT + mId, System.currentTimeMillis()).commit();
         new HideHeaderTask().execute();
     }
@@ -453,7 +453,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                 publishProgress(bottomMargin);
                 SystemClock.sleep(10);
             }
-            currentStatus = STATUS_REFRESHING;
+            currentStatus = STATUS_LOADING;
             publishProgress(0);
             if (loadListener != null) {
                 loadListener.onLoad();
@@ -511,7 +511,7 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
         protected void onPostExecute(Integer topMargin) {
             headerLayoutParams.topMargin = topMargin;
             header.setLayoutParams(headerLayoutParams);
-            currentStatus = STATUS_REFRESH_FINISHED;
+            currentStatus = STATUS_NORMAL;
         }
     }
 
@@ -537,8 +537,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
             footerLayoutParams.bottomMargin = values[0];
             footer.setLayoutParams(footerLayoutParams);
             recyclerViewParams.topMargin = -(values[0] - footerHeight);
-            LogUtil.e("values[0]" + values[0]);
-            LogUtil.e("recyclerViewParams.topMargin" + recyclerViewParams.topMargin);
             recyclerView.setLayoutParams(recyclerViewParams);
         }
 
@@ -546,9 +544,8 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
         protected void onPostExecute(Integer bottomMargin) {
             footerLayoutParams.bottomMargin = bottomMargin;
             footer.setLayoutParams(footerLayoutParams);
-            currentStatus = STATUS_REFRESH_FINISHED;
+            currentStatus = STATUS_NORMAL;
             recyclerViewParams.topMargin = 0;
-            LogUtil.e("recyclerViewParams.topMargin" + recyclerViewParams.topMargin);
             recyclerView.setLayoutParams(recyclerViewParams);
         }
     }
