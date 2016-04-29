@@ -27,7 +27,7 @@ import com.wuwind.corelibrary.utils.LogUtil;
  *
  * @author guolin
  */
-public class RecyclerRefreshableView extends LinearLayout implements OnTouchListener {
+public class RecyclerRefreshableView2 extends LinearLayout implements OnTouchListener {
 
     public static final int STATUS_PULL_TO_REFRESH = 0;//下拉状态
 
@@ -100,15 +100,18 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
 
     private boolean loadOnce;//是否已加载过一次layout，这里onLayout中的初始化只需加载一次
 
-    private boolean ableToPull, ableToPlug;//当前是否可以下拉，只有RecyclerView滚动到头的时候才允许下拉
+    private boolean ableToPull;//当前是否可以下拉，只有RecyclerView滚动到头的时候才允许下拉
 
+    private LinearLayoutManager mLayoutManager;
+
+    private  boolean isLoading;
     /**
      * 下拉刷新控件的构造函数，会在运行时动态添加一个下拉头的布局。
      *
      * @param context
      * @param attrs
      */
-    public RecyclerRefreshableView(Context context, AttributeSet attrs) {
+    public RecyclerRefreshableView2(Context context, AttributeSet attrs) {
         super(context, attrs);
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         setOrientation(VERTICAL);
@@ -134,8 +137,9 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
             headerLayoutParams = (MarginLayoutParams) header.getLayoutParams();
             headerLayoutParams.topMargin = hideHeaderHeight;
             recyclerView = (RecyclerView) getChildAt(1);
-
             recyclerView.setOnTouchListener(this);
+            mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+            recyclerView.addOnScrollListener(new MScrollListener());
             footer = getChildAt(2);
             footerHeight = -footer.getMeasuredHeight();
             footerLayoutParams = (MarginLayoutParams) footer.getLayoutParams();
@@ -154,6 +158,35 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
             recyclerViewParams = (MarginLayoutParams) recyclerView.getLayoutParams();
         }
     }
+
+    private class MScrollListener extends RecyclerView.OnScrollListener {
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            int mItemCount = mLayoutManager.getItemCount();  //总条数
+            int lastVisiblePos = mLayoutManager.findLastVisibleItemPosition();
+            View lastChild = mLayoutManager.findViewByPosition(lastVisiblePos);
+            if (lastVisiblePos == mItemCount - 1 && lastChild.getBottom() == mLayoutManager.getHeight()) {
+                if(isLoading)
+                    return;
+                LogUtil.e("加载" + recyclerView.getHeight());
+                footerLayoutParams.bottomMargin = 0;
+                footer.setLayoutParams(footerLayoutParams);
+                recyclerViewParams.topMargin = footerHeight;
+                recyclerView.setLayoutParams(recyclerViewParams);
+                isLoading = true;
+            } else {
+                if(!isLoading)
+                    return;
+                LogUtil.e("隐藏加载");
+                footerLayoutParams.bottomMargin = footerHeight;
+                footer.setLayoutParams(footerLayoutParams);
+                recyclerViewParams.topMargin = 0;
+                recyclerView.setLayoutParams(recyclerViewParams);
+                isLoading = false;
+            }
+        }
+    }
+
 
     /**
      * 当RecyclerView被触摸时调用，其中处理了各种下拉刷新的具体逻辑。
@@ -187,9 +220,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     if (currentMoveStatus == STATUS_MOVE_DOWN && ableToPull) {
                         currentStatus = STATUS_PULL_TO_REFRESH;
                         return true;
-                    } else if (currentMoveStatus == STATUS_MOVE_UP && ableToPlug) {
-                        currentStatus = STATUS_PULL_TO_LOAD;
-                        LogUtil.e("山花");
                     }
                     break;
                 //可刷新
@@ -206,13 +236,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     }
                     //可加载
                     break;
-                case STATUS_PULL_TO_LOAD:
-                    LogUtil.e("可加载");
-                    if (currentMoveStatus == STATUS_MOVE_UP) {
-                        load(distance);
-                        return true;
-                    }
-                    break;
                 case STATUS_REFRESHING:
                     LogUtil.e("正在刷新");
                     if (currentMoveStatus == STATUS_MOVE_DOWN) {
@@ -226,14 +249,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                         LogUtil.e("山花");
                     }
                     return true;
-                case STATUS_LOADING:
-                    LogUtil.e("正在加载");
-                    if (currentMoveStatus == STATUS_MOVE_DOWN) {
-                        load(distance);
-                        return true;
-                    }
-                    break;
-                //正常
                 default:
                     break;
             }
@@ -287,21 +302,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
         header.setLayoutParams(headerLayoutParams);
     }
 
-    //加载
-    private void load(int distance) {
-        LogUtil.e("加载");
-//        通过偏移下拉头的topMargin值头的topMargin值，来实现下拉效果
-//        LogUtil.e("上滑  加载");
-        if (footerLayoutParams.bottomMargin > 0) {
-            currentStatus = STATUS_RELEASE_TO_LOAD;
-        } else {
-            currentStatus = STATUS_PULL_TO_LOAD;
-        }
-        footerLayoutParams.bottomMargin = footerHeight - distance;
-        footer.setLayoutParams(footerLayoutParams);
-        recyclerViewParams.topMargin = (distance);
-        recyclerView.setLayoutParams(recyclerViewParams);
-    }
 
     private boolean actionUp() {
         switch (currentStatus) {
@@ -321,12 +321,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
             case STATUS_PULL_TO_REFRESH:
                 // 松手时如果是下拉状态，就去调用隐藏下拉头的任务
                 new HideHeaderTask().execute();
-                return true;
-            case STATUS_RELEASE_TO_LOAD:
-                new LoadingTask().execute();
-                return true;
-            case STATUS_PULL_TO_LOAD:
-                new HideFooterTask().execute();
                 return true;
             default:
                 return false;
@@ -364,8 +358,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
      */
     public void finishLoading() {
         currentStatus = STATUS_LOAD_FINISHED;
-//		preferences.edit().putLong(UPDATED_AT + mId, System.currentTimeMillis()).commit();
-        new HideFooterTask().execute();
     }
 
     /**
@@ -375,8 +367,6 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
      * @param event
      */
     private void setIsPullAble(MotionEvent event) {
-        LinearLayoutManager mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        int itemCount = mLayoutManager.getItemCount();
         View firstChild = recyclerView.getChildAt(0);
         if (firstChild != null) {
             int firstVisiblePos = mLayoutManager.findFirstVisibleItemPosition();
@@ -387,42 +377,13 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     yDown = event.getRawY();
                 }
                 // 如果首个元素的上边缘，距离父布局值为0，就说明RecyclerView滚动到了最顶部，此时应该允许下拉刷新
-//                if (currentStatus == STATUS_NORMAL)
-//                    currentStatus = STATUS_PULL_TO_REFRESH;
                 ableToPull = true;
-                ableToPlug = false;
                 return;
             }
-            int lastVisiblePos = mLayoutManager.findLastVisibleItemPosition();
-            View lastChild = mLayoutManager.findViewByPosition(lastVisiblePos);
-            if (lastChild != null)
-                if (lastVisiblePos == itemCount - 1 && lastChild.getBottom() == mLayoutManager.getHeight()) {
-                    LogUtil.e("|可以加载");
-                    LogUtil.e("lastVisiblePos" + lastVisiblePos);
-                    LogUtil.e("itemCount" + itemCount);
-                    if (!ableToPlug) {
-                        yDown = event.getRawY();
-                    }
-                    // 如果首个元素的上边缘，距离父布局值为0，就说明RecyclerView滚动到了最顶部，此时应该允许下拉刷新
-//                    if (currentStatus == STATUS_NORMAL)
-//                        currentStatus = STATUS_PULL_TO_LOAD;
-                    ableToPlug = true;
-                    ableToPull = false;
-                    return;
-                }
-//            if (headerLayoutParams.topMargin != hideHeaderHeight) {
-//                LogUtil.e("恢复正常");
-//                headerLayoutParams.topMargin = hideHeaderHeight;
-//                header.setLayoutParams(headerLayoutParams);
-//            }
-//            currentStatus = STATUS_NORMAL;
             ableToPull = false;
-            ableToPlug = false;
             return;
         } else {
             // 如果RecyclerView中没有元素，也应该允许下拉刷新
-//            if (currentStatus == STATUS_NORMAL)
-//                currentStatus = STATUS_PULL_TO_REFRESH;
             ableToPull = true;
             return;
         }
@@ -624,81 +585,81 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
     /**
      * 正在刷新的任务，在此任务中会去回调注册进来的下拉刷新监听器。
      */
-    class LoadingTask extends AsyncTask<Void, Integer, Void> {
+//    class LoadingTask extends AsyncTask<Void, Integer, Void> {
+//
+//        @Override
+//        protected Void doInBackground(Void... params) {
+////            int bottomMargin = footerLayoutParams.bottomMargin;
+//            while (true) {
+//                bottomMargin = bottomMargin + SCROLL_SPEED;
+//                if (bottomMargin <= 0) {
+//                    bottomMargin = 0;
+//                    break;
+//                }
+//                publishProgress(bottomMargin);
+//                SystemClock.sleep(10);
+//            }
+//            currentStatus = STATUS_LOADING;
+//            publishProgress(0);
+//            if (loadListener != null) {
+//                loadListener.onLoad();
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(Integer... bottomMargin) {
+//            updateHeaderView();
+//            footerLayoutParams.bottomMargin = bottomMargin[0];
+//            header.setLayoutParams(headerLayoutParams);
+//            recyclerViewParams.topMargin = -bottomMargin[0] + footerHeight;
+//            recyclerView.setLayoutParams(recyclerViewParams);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void aVoid) {
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    finishLoading();
+//                }
+//            }, 5000);
+//        }
+//    }
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            int bottomMargin = footerLayoutParams.bottomMargin;
-            while (true) {
-                bottomMargin = bottomMargin + SCROLL_SPEED;
-                if (bottomMargin <= 0) {
-                    bottomMargin = 0;
-                    break;
-                }
-                publishProgress(bottomMargin);
-                SystemClock.sleep(10);
-            }
-            currentStatus = STATUS_LOADING;
-            publishProgress(0);
-            if (loadListener != null) {
-                loadListener.onLoad();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... bottomMargin) {
-            updateHeaderView();
-            footerLayoutParams.bottomMargin = bottomMargin[0];
-            header.setLayoutParams(headerLayoutParams);
-            recyclerViewParams.topMargin = -bottomMargin[0] + footerHeight;
-            recyclerView.setLayoutParams(recyclerViewParams);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    finishLoading();
-                }
-            }, 5000);
-        }
-    }
-
-    class HideFooterTask extends AsyncTask<Void, Integer, Integer> {
-        @Override
-        protected Integer doInBackground(Void... params) {
-            int bottomMargin = footerLayoutParams.bottomMargin;
-            while (true) {
-                bottomMargin = bottomMargin + SCROLL_SPEED;
-                if (bottomMargin <= footerHeight) {
-                    bottomMargin = footerHeight;
-                    break;
-                }
-                publishProgress(bottomMargin);
-                SystemClock.sleep(10);
-            }
-            return bottomMargin;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            footerLayoutParams.bottomMargin = values[0];
-            footer.setLayoutParams(footerLayoutParams);
-            recyclerViewParams.topMargin = -(values[0] - footerHeight);
-            recyclerView.setLayoutParams(recyclerViewParams);
-        }
-
-        @Override
-        protected void onPostExecute(Integer bottomMargin) {
-            footerLayoutParams.bottomMargin = bottomMargin;
-            footer.setLayoutParams(footerLayoutParams);
-            currentStatus = STATUS_NORMAL;
-            recyclerViewParams.topMargin = 0;
-            recyclerView.setLayoutParams(recyclerViewParams);
-        }
-    }
+//    class HideFooterTask extends AsyncTask<Void, Integer, Integer> {
+//        @Override
+//        protected Integer doInBackground(Void... params) {
+//            int bottomMargin = footerLayoutParams.bottomMargin;
+//            while (true) {
+//                bottomMargin = bottomMargin + SCROLL_SPEED;
+//                if (bottomMargin <= footerHeight) {
+//                    bottomMargin = footerHeight;
+//                    break;
+//                }
+//                publishProgress(bottomMargin);
+//                SystemClock.sleep(10);
+//            }
+//            return bottomMargin;
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(Integer... values) {
+//            footerLayoutParams.bottomMargin = values[0];
+//            footer.setLayoutParams(footerLayoutParams);
+//            recyclerViewParams.topMargin = -(values[0] - footerHeight);
+//            recyclerView.setLayoutParams(recyclerViewParams);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Integer bottomMargin) {
+//            footerLayoutParams.bottomMargin = bottomMargin;
+//            footer.setLayoutParams(footerLayoutParams);
+//            currentStatus = STATUS_NORMAL;
+//            recyclerViewParams.topMargin = 0;
+//            recyclerView.setLayoutParams(recyclerViewParams);
+//        }
+//    }
 
     /**
      * 下拉刷新的监听器，使用下拉刷新的地方应该注册此监听器来获取刷新回调。
