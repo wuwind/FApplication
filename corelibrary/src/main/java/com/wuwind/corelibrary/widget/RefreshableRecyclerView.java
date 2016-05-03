@@ -27,7 +27,7 @@ import com.wuwind.corelibrary.utils.LogUtil;
  *
  * @author guolin
  */
-public class RecyclerRefreshableView extends LinearLayout implements OnTouchListener {
+public class RefreshableRecyclerView extends LinearLayout implements OnTouchListener {
 
     public static final int STATUS_PULL_TO_REFRESH = 0;//下拉状态
 
@@ -102,13 +102,15 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
 
     private boolean ableToPull, ableToPlug;//当前是否可以下拉，只有RecyclerView滚动到头的时候才允许下拉
 
+    private LinearLayoutManager mLayoutManager;
+
     /**
      * 下拉刷新控件的构造函数，会在运行时动态添加一个下拉头的布局。
      *
      * @param context
      * @param attrs
      */
-    public RecyclerRefreshableView(Context context, AttributeSet attrs) {
+    public RefreshableRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
         touchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
         setOrientation(VERTICAL);
@@ -136,6 +138,8 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
             recyclerView = (RecyclerView) getChildAt(1);
 
             recyclerView.setOnTouchListener(this);
+            mLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+            recyclerView.addOnScrollListener(new MScrollListener());
             footer = getChildAt(2);
             footerHeight = -footer.getMeasuredHeight();
             footerLayoutParams = (MarginLayoutParams) footer.getLayoutParams();
@@ -155,6 +159,40 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
         }
     }
 
+    private class MScrollListener extends RecyclerView.OnScrollListener {
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                int lastVisiblePos = mLayoutManager.findLastVisibleItemPosition();
+                View lastChild = mLayoutManager.findViewByPosition(lastVisiblePos);
+                int itemCount = mLayoutManager.getItemCount();
+                if (null != lastChild) {
+
+                    if (lastVisiblePos == itemCount - 1 && lastChild.getBottom() == mLayoutManager.getHeight()) {
+                        LogUtil.e("|可以加载");
+                        LogUtil.e("lastVisiblePos" + lastVisiblePos);
+                        LogUtil.e("itemCount" + itemCount);
+                        footerLayoutParams.bottomMargin = 0;
+                        footer.setLayoutParams(footerLayoutParams);
+                        recyclerViewParams.topMargin = footerHeight;
+                        recyclerView.setLayoutParams(recyclerViewParams);
+                        currentStatus = STATUS_LOADING;
+                        return;
+                    }
+                }
+            } else if (newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                footerLayoutParams.bottomMargin = footerHeight;
+                footer.setLayoutParams(footerLayoutParams);
+                recyclerViewParams.topMargin = 0;
+                recyclerView.setLayoutParams(recyclerViewParams);
+                currentStatus = STATUS_NORMAL;
+            }
+        }
+    }
+
+
     /**
      * 当RecyclerView被触摸时调用，其中处理了各种下拉刷新的具体逻辑。
      */
@@ -162,19 +200,13 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
     public boolean onTouch(View v, MotionEvent event) {
 
         int action = event.getAction();
-
+        setIsPullAble(event);
         if (action == MotionEvent.ACTION_DOWN) {
             yDown = event.getRawY();
+            LogUtil.e("yDown1:" + yDown);
         } else if (action == MotionEvent.ACTION_MOVE) {
-
-            setIsPullAble(event);
-
             float yMove = event.getRawY();
             int distance = (int) (yMove - yDown);
-            if (Math.abs(distance) < touchSlop) {
-                return false;
-            }
-
             int currentMoveStatus = -1;
             if (distance > 0) {
                 currentMoveStatus = STATUS_MOVE_DOWN;
@@ -206,18 +238,14 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     }
                     //可加载
                     break;
-                case STATUS_PULL_TO_LOAD:
-                    LogUtil.e("可加载");
-                    if (currentMoveStatus == STATUS_MOVE_UP) {
-                        load(distance);
-                        return true;
-                    }
-                    break;
                 case STATUS_REFRESHING:
                     LogUtil.e("正在刷新");
+                    LogUtil.e("headerLayoutParams.topMargin" + headerLayoutParams.topMargin);
                     if (currentMoveStatus == STATUS_MOVE_DOWN) {
-                        if (headerLayoutParams.topMargin > 0 || !ableToPull)
+                        LogUtil.e("hideHeaderHeight" + hideHeaderHeight);
+                        if (headerLayoutParams.topMargin >= 0 || !ableToPull)
                             return false;
+                        LogUtil.e("下滑");
                         downRefresh(distance);
                     } else if (currentMoveStatus == STATUS_MOVE_UP) {
                         if (headerLayoutParams.topMargin <= hideHeaderHeight)
@@ -227,12 +255,15 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     }
                     return true;
                 case STATUS_LOADING:
-                    LogUtil.e("正在加载");
-                    if (currentMoveStatus == STATUS_MOVE_DOWN) {
+                    LogUtil.e("正在加载---");
+                    LogUtil.e("yDown2:" + yDown);
+                    LogUtil.e("distance:" + distance);
+                    if (currentMoveStatus == STATUS_MOVE_DOWN && footerLayoutParams.bottomMargin > footerHeight) {
+                        LogUtil.e("下滑");
                         load(distance);
                         return true;
                     }
-                    break;
+                    return false;
                 //正常
                 default:
                     break;
@@ -292,18 +323,18 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
         LogUtil.e("加载");
 //        通过偏移下拉头的topMargin值头的topMargin值，来实现下拉效果
 //        LogUtil.e("上滑  加载");
-        if (footerLayoutParams.bottomMargin > 0) {
-            currentStatus = STATUS_RELEASE_TO_LOAD;
-        } else {
-            currentStatus = STATUS_PULL_TO_LOAD;
+        if (footerLayoutParams.bottomMargin > footerHeight) {
+            footerLayoutParams.bottomMargin = -distance;
+            footer.setLayoutParams(footerLayoutParams);
+            recyclerViewParams.topMargin = distance + footerHeight;
+            recyclerView.setLayoutParams(recyclerViewParams);
         }
-        footerLayoutParams.bottomMargin = footerHeight - distance;
-        footer.setLayoutParams(footerLayoutParams);
-        recyclerViewParams.topMargin = (distance);
-        recyclerView.setLayoutParams(recyclerViewParams);
+
     }
 
     private boolean actionUp() {
+        ableToPull = false;
+        ableToPlug = false;
         switch (currentStatus) {
             case STATUS_RELEASE_TO_REFRESH:
                 // 松手时如果是释放立即刷新状态，就去调用正在刷新的任务
@@ -316,12 +347,16 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
                     handler.sendEmptyMessage(0);
                 } else {
                     handler.sendEmptyMessage(1);
+                    return true;
                 }
                 return false;
             case STATUS_PULL_TO_REFRESH:
                 // 松手时如果是下拉状态，就去调用隐藏下拉头的任务
-                new HideHeaderTask().execute();
-                return true;
+                if (headerLayoutParams.topMargin > hideHeaderHeight) {
+                    new HideHeaderTask().execute();
+                    return true;
+                } else
+                    return false;
             case STATUS_RELEASE_TO_LOAD:
                 new LoadingTask().execute();
                 return true;
@@ -380,15 +415,15 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
         View firstChild = recyclerView.getChildAt(0);
         if (firstChild != null) {
             int firstVisiblePos = mLayoutManager.findFirstVisibleItemPosition();
-            LogUtil.e(2, "firstChild.getTop()" + firstChild.getTop());
+//            LogUtil.e(2, "firstChild.getTop()" + firstChild.getTop());
             if (firstVisiblePos == 0 && firstChild.getTop() == 0) {
                 LogUtil.e("|可以刷新");
                 if (!ableToPull) {
                     yDown = event.getRawY();
                 }
                 // 如果首个元素的上边缘，距离父布局值为0，就说明RecyclerView滚动到了最顶部，此时应该允许下拉刷新
-//                if (currentStatus == STATUS_NORMAL)
-//                    currentStatus = STATUS_PULL_TO_REFRESH;
+                if (currentStatus == STATUS_NORMAL)
+                    currentStatus = STATUS_PULL_TO_REFRESH;
                 ableToPull = true;
                 ableToPlug = false;
                 return;
@@ -397,25 +432,15 @@ public class RecyclerRefreshableView extends LinearLayout implements OnTouchList
             View lastChild = mLayoutManager.findViewByPosition(lastVisiblePos);
             if (lastChild != null)
                 if (lastVisiblePos == itemCount - 1 && lastChild.getBottom() == mLayoutManager.getHeight()) {
-                    LogUtil.e("|可以加载");
+                    LogUtil.e("加载隐藏");
                     LogUtil.e("lastVisiblePos" + lastVisiblePos);
                     LogUtil.e("itemCount" + itemCount);
-                    if (!ableToPlug) {
-                        yDown = event.getRawY();
-                    }
-                    // 如果首个元素的上边缘，距离父布局值为0，就说明RecyclerView滚动到了最顶部，此时应该允许下拉刷新
-//                    if (currentStatus == STATUS_NORMAL)
-//                        currentStatus = STATUS_PULL_TO_LOAD;
+                    yDown = event.getRawY();
+                    LogUtil.e("yDown3:" + yDown);
                     ableToPlug = true;
                     ableToPull = false;
                     return;
                 }
-//            if (headerLayoutParams.topMargin != hideHeaderHeight) {
-//                LogUtil.e("恢复正常");
-//                headerLayoutParams.topMargin = hideHeaderHeight;
-//                header.setLayoutParams(headerLayoutParams);
-//            }
-//            currentStatus = STATUS_NORMAL;
             ableToPull = false;
             ableToPlug = false;
             return;
