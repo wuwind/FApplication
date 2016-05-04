@@ -1,5 +1,6 @@
 package com.wuwind.corelibrary.network;
 
+import okhttp3.Interceptor;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
@@ -25,5 +26,7 @@ public class BaseHttpClient {
         Observable orderObservable = null;
         return subNext(orderObservable, observer);
     }
+
+
 
 }
