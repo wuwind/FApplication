@@ -3,6 +3,8 @@ package com.wuwind.corelibrary.utils;
 import android.os.Environment;
 import android.os.StatFs;
 
+import com.wuwind.corelibrary.base.BaseApplication;
+
 import java.io.File;
 
 /**
@@ -124,6 +126,23 @@ public class FilePathUtil {
 		} else {
 			throw new Exception("SDcard不存在");
 		}
+	}
+
+
+	/**
+	 * 当SD卡存在或者SD卡不可被移除的时候，就调用getExternalCacheDir()方法来获取缓存路径，
+	 * 否则就调用getCacheDir()方法来获取缓存路径。前者获取到的就是 /sdcard/Android/data/<application package>/cache 这个路径，
+	 * 而后者获取到的是 /data/data/<application package>/cache 这个路径
+	 * @return
+	 */
+	public static String getDiskCacheDir() {
+		String cachePath;
+		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) || !Environment.isExternalStorageRemovable()) {
+			cachePath = BaseApplication.context.getExternalCacheDir().getPath();
+		} else {
+			cachePath = BaseApplication.context.getCacheDir().getPath();
+		}
+		return cachePath;
 	}
 
 	// 判断所传入的文件是否大于SDcard剩余的容量

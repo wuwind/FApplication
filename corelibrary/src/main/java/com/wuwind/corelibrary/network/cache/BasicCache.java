@@ -3,8 +3,8 @@ package com.wuwind.corelibrary.network.cache;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.util.LruCache;
 
 import com.jakewharton.disklrucache.DiskLruCache;
 import com.wuwind.corelibrary.utils.Md5;
