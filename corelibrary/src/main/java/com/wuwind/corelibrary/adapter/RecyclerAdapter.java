@@ -65,6 +65,10 @@ public abstract class RecyclerAdapter<T, H extends RecyclerView.ViewHolder> exte
         this.notifyDataSetChanged();
     }
 
+    public List<T> getDatas() {
+        return datas;
+    }
+
     public void addData(T t) {
         if (datas == null)
             datas = new ArrayList<T>();
