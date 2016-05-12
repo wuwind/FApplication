@@ -3,7 +3,10 @@ package com.wuwind.corelibrary.utils;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Build;
 import android.os.SystemClock;
+import android.view.WindowManager;
 
 import com.wuwind.corelibrary.R;
 
@@ -21,7 +24,7 @@ public class DialogUtil {
      * @return Dialog
      */
     public static Dialog createDialog(Context context, int layoutResID) {
-        Dialog dialog = new MDialog(context, R.style.NobackDialog);
+        Dialog dialog = new MDialog(context, R.style.base_dialog);
         dialog.setContentView(layoutResID);
         return dialog;
     }
@@ -46,15 +49,22 @@ public class DialogUtil {
 
     public static void setShowLong(Dialog dialog, long showLong) {
         if (dialog != null && dialog instanceof MDialog) {
-            ((DialogUtil.MDialog)(dialog)).setShowLong(showLong);
+            ((DialogUtil.MDialog) (dialog)).setShowLong(showLong);
         }
     }
 
-    public static class MDialog extends Dialog {
+    public static void showAtBottom(Dialog dialog, boolean flag) {
+        if (dialog != null && dialog instanceof MDialog) {
+            ((DialogUtil.MDialog) (dialog)).showAtBottom();
+        }
+    }
+
+    public static class MDialog extends Dialog implements DialogInterface.OnDismissListener {
 
         public long createTime;
         public long showTime;
         public long showLong;
+        private OnDismissListener onDismissListener;
 
         public MDialog(Context context) {
             this(context, 0);
@@ -63,10 +73,20 @@ public class DialogUtil {
         public MDialog(Context context, int themeResId) {
             super(context, themeResId);
             createTime = SystemClock.uptimeMillis();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
+                localLayoutParams.flags = (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | localLayoutParams.flags);
+            }
+            super.setOnDismissListener(this);
         }
 
         public void setShowLong(long showLong) {
             this.showLong = showLong;
+        }
+
+        @Override
+        public void setOnDismissListener(OnDismissListener listener) {
+            onDismissListener = listener;
         }
 
         @Override
@@ -83,6 +103,22 @@ public class DialogUtil {
                     super.dismiss();
             } else
                 super.dismiss();
+        }
+
+        public void showAtBottom() {
+            show();
+            int height = DisplayUtil.getDisplayMetrics(getContext()).y;
+            WindowManager.LayoutParams params = getWindow().getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.x = 0;
+            params.y = height - params.height;
+            getWindow().setAttributes(params);
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            if (onDismissListener != null)
+                onDismissListener.onDismiss(dialog);
         }
     }
 

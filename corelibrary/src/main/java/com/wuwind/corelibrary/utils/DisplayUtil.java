@@ -1,9 +1,12 @@
 package com.wuwind.corelibrary.utils;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
+import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Build;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,8 @@ import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+
+import java.util.Locale;
 
 /**
  * Created by Wuhf on 2016/4/8.
@@ -151,6 +156,48 @@ public class DisplayUtil {
             params.height = totalHeight
                     + (lv.getDividerHeight() * (adapter.getCount() - 1));
             lv.setLayoutParams(params);
+        }
+    }
+
+    /**
+     * 判断设备是否是模拟器
+     *
+     * @return
+     */
+    public static boolean isEmulator() {
+        return "sdk".equals(Build.PRODUCT) || "google_sdk".equals(Build.PRODUCT) || "generic".equals(Build.BRAND.toLowerCase(Locale.getDefault()));
+    }
+
+    /**
+     * 得到设备id
+     *
+     * @param context
+     * @return
+     */
+    public static String getAndroidId(Context context) {
+        String android_id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return android_id;
+    }
+
+    public static int getStatusBarHeight(Context context) {
+        int result = 0;
+        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = context.getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+
+    @SuppressWarnings("deprecation")
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static void copyToClipboard(Context context, String text) {
+        // if()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            android.text.ClipboardManager clipboard = (android.text.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setText(text);
+        } else {
+            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            clipboard.setPrimaryClip(ClipData.newPlainText(null, text));
         }
     }
 }
