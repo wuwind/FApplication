@@ -181,6 +181,7 @@ public class SildingLayoutVertical extends RelativeLayout implements OnTouchList
 
         @Override
         public boolean onDown(MotionEvent e) {
+            downY = tempY = (int) e.getRawY();
             return true;
         }
 
@@ -195,7 +196,7 @@ public class SildingLayoutVertical extends RelativeLayout implements OnTouchList
                 isSilding = true;
             }
 
-            if (deltaY >= 0 && isSilding) {
+            if ((deltaY >= 0 || mParentView.getScrollY() > 0) && isSilding) {
                 mParentView.scrollBy(0, deltaY);
 
                 // 屏蔽在滑动过程中ListView ScrollView等自己的滑动事件
