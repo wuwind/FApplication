@@ -1,17 +1,20 @@
 package com.wuwind.corelibrary.utils;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Environment;
 import android.os.StatFs;
+import android.os.storage.StorageManager;
 
 import com.wuwind.corelibrary.base.BaseApplication;
 
 import java.io.File;
+import java.lang.reflect.Method;
 
 /**
  * SD卡目录工具类
- * 
+ *
  * @author WuRS
- * 
  */
 public class FilePathUtil {
 
@@ -21,7 +24,7 @@ public class FilePathUtil {
 
 	/**
 	 * 文件主目录
-	 * 
+	 *
 	 * @return
 	 */
 	public static String getMainPath() throws Exception {
@@ -38,7 +41,7 @@ public class FilePathUtil {
 
 	/**
 	 * 获取错误日志文件夹
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -56,7 +59,7 @@ public class FilePathUtil {
 
 	/**
 	 * 获取图片缓存文件夹
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -73,8 +76,7 @@ public class FilePathUtil {
 	}
 
 	/**
-	 * @param dirName
-	 *            当前目录名称
+	 * @param dirName 当前目录名称
 	 * @return 获取主目录下的子目录，不存在目录将创建目录
 	 * @throws Exception
 	 */
@@ -88,7 +90,7 @@ public class FilePathUtil {
 
 	/**
 	 * 删除文件或文件夹
-	 * 
+	 *
 	 * @param filePath
 	 */
 	public static void deleteFile(String filePath) {
@@ -115,17 +117,13 @@ public class FilePathUtil {
 	}
 
 	// 取SD卡路径
-	public static String getSDPath() throws Exception {
+	public static String getSDPath() {
 		File sdDir = null;
 		boolean sdCardExist = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED); // 判断sd卡是否存在
 		if (sdCardExist) {
 			sdDir = Environment.getExternalStorageDirectory(); // 获取根目录
 		}
-		if (sdDir != null) {
-			return sdDir.toString();
-		} else {
-			throw new Exception("SDcard不存在");
-		}
+		return sdDir.toString();
 	}
 
 
@@ -133,6 +131,7 @@ public class FilePathUtil {
 	 * 当SD卡存在或者SD卡不可被移除的时候，就调用getExternalCacheDir()方法来获取缓存路径，
 	 * 否则就调用getCacheDir()方法来获取缓存路径。前者获取到的就是 /sdcard/Android/data/<application package>/cache 这个路径，
 	 * 而后者获取到的是 /data/data/<application package>/cache 这个路径
+	 *
 	 * @return
 	 */
 	public static String getDiskCacheDir() {
@@ -163,5 +162,23 @@ public class FilePathUtil {
 		else
 			return false;
 	}
+
+	/**
+	 * 获取外置SD卡路径
+	 *
+	 * @return 应该就一条记录或空
+	 */
+	public static String[] getExtSDCardPath(Context context) {
+		StorageManager mStorageManager = (StorageManager) context.getSystemService(Activity.STORAGE_SERVICE);
+		try {
+			Method mMethodGetPaths = mStorageManager.getClass().getMethod("getVolumePaths");
+			String[] paths = (String[]) mMethodGetPaths.invoke(mStorageManager);
+			return paths;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 
 }

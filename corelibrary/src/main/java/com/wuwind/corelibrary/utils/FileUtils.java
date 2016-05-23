@@ -171,6 +171,36 @@ public class FileUtils {
     }
 
 
+    /**
+     * 将拍下来的照片存放在SD卡中
+     */
+    public static boolean writeFile(String filePath, byte[] data) {
+        if (data.length <= 0) {
+            return false;
+        }
+        File jpgFile = null;
+        FileOutputStream outputStream = null; // 文件输出流
+        try {
+            makeDirs(filePath);
+            jpgFile = new File(filePath);
+            outputStream = new FileOutputStream(jpgFile);
+            outputStream.write(data); // 写入sd卡中
+            outputStream.flush();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (outputStream != null)
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return false;
+    }
+
+
     public static void moveFile(String sourceFilePath, String destFilePath) {
         if (TextUtils.isEmpty(sourceFilePath) || TextUtils.isEmpty(destFilePath)) {
             throw new RuntimeException("Both sourceFilePath and destFilePath cannot be null.");
@@ -192,7 +222,7 @@ public class FileUtils {
 
     /**
      * copy file
-     * 
+     *
      * @param sourceFilePath
      * @param destFilePath
      * @return
@@ -210,7 +240,7 @@ public class FileUtils {
 
     /**
      * read file to string list, a element of list is a line
-     * 
+     *
      * @param filePath
      * @param charsetName The name of a supported
      * @return if file not exist, return null, else return content of file
@@ -248,7 +278,7 @@ public class FileUtils {
 
     /**
      * get file name from path, not include suffix
-     * 
+     * <p/>
      * <pre>
      *      getFileNameWithoutExtension(null)               =   null
      *      getFileNameWithoutExtension("")                 =   ""
@@ -263,7 +293,7 @@ public class FileUtils {
      *      getFileNameWithoutExtension("/home/admin")      =   "admin"
      *      getFileNameWithoutExtension("/home/admin/a.txt/b.mp3")  =   "b"
      * </pre>
-     * 
+     *
      * @param filePath
      * @return file name from path, not include suffix
      * @see
@@ -286,7 +316,7 @@ public class FileUtils {
 
     /**
      * get file name from path, include suffix
-     * 
+     * <p/>
      * <pre>
      *      getFileName(null)               =   null
      *      getFileName("")                 =   ""
@@ -301,7 +331,7 @@ public class FileUtils {
      *      getFileName("/home/admin")      =   "admin"
      *      getFileName("/home/admin/a.txt/b.mp3")  =   "b.mp3"
      * </pre>
-     * 
+     *
      * @param filePath
      * @return file name from path, include suffix
      */
@@ -316,7 +346,7 @@ public class FileUtils {
 
     /**
      * get folder name from path
-     * 
+     * <p/>
      * <pre>
      *      getFolderName(null)               =   null
      *      getFolderName("")                 =   ""
@@ -332,7 +362,7 @@ public class FileUtils {
      *      getFolderName("/home/admin")      =   "/home"
      *      getFolderName("/home/admin/a.txt/b.mp3")  =   "/home/admin/a.txt"
      * </pre>
-     * 
+     *
      * @param filePath
      * @return
      */
@@ -348,7 +378,7 @@ public class FileUtils {
 
     /**
      * get suffix of file from path
-     * 
+     * <p/>
      * <pre>
      *      getFileExtension(null)               =   ""
      *      getFileExtension("")                 =   ""
@@ -364,7 +394,7 @@ public class FileUtils {
      *      getFileExtension("/home/admin/a.txt/b")  =   ""
      *      getFileExtension("/home/admin/a.txt/b.mp3")  =   "mp3"
      * </pre>
-     * 
+     *
      * @param filePath
      * @return
      */
@@ -390,15 +420,15 @@ public class FileUtils {
      * <li>makeDirs("C:\\Users\\Trinea") can only create users folder</li>
      * <li>makeFolder("C:\\Users\\Trinea\\") can create Trinea folder</li>
      * </ul>
-     * 
+     *
      * @param filePath
      * @return true if the necessary directories have been created or the target directory already exists, false one of
-     *         the directories can not be created.
-     *         <ul>
-     *         <li>if {@link FileUtils#getFolderName(String)} return null, return false</li>
-     *         <li>if target directory already exists, return true</li>
-     *         <li>return </li>
-     *         </ul>
+     * the directories can not be created.
+     * <ul>
+     * <li>if {@link FileUtils#getFolderName(String)} return null, return false</li>
+     * <li>if target directory already exists, return true</li>
+     * <li>return </li>
+     * </ul>
      */
     public static boolean makeDirs(String filePath) {
         String folderName = getFolderName(filePath);
@@ -421,7 +451,7 @@ public class FileUtils {
 
     /**
      * Indicates if this file represents a file on the underlying file system.
-     * 
+     *
      * @param filePath
      * @return
      */
@@ -436,7 +466,7 @@ public class FileUtils {
 
     /**
      * Indicates if this file represents a directory on the underlying file system.
-     * 
+     *
      * @param directoryPath
      * @return
      */
@@ -456,7 +486,7 @@ public class FileUtils {
      * <li>if path not exist, return true</li>
      * <li>if path exist, delete recursion. return true</li>
      * <ul>
-     * 
+     *
      * @param path
      * @return
      */
@@ -491,7 +521,7 @@ public class FileUtils {
      * <li>if path is null or empty, return -1</li>
      * <li>if path exist and it is a file, return file size, else return -1</li>
      * <ul>
-     * 
+     *
      * @param path
      * @return returns the length of this file in bytes. returns -1 if the file does not exist.
      */
@@ -503,80 +533,78 @@ public class FileUtils {
         File file = new File(path);
         return (file.exists() && file.isFile() ? file.length() : -1);
     }
-    
+
     public static boolean isBlank(String str) {
         return (str == null || str.trim().length() == 0);
     }
-    
+
     public static boolean isEmpty(CharSequence str) {
         return (str == null || str.length() == 0);
     }
-    
+
     /*获取文件夹中文件数*/
     public static int getFileNum(String path) {
-    	if (isBlank(path)) {
-    		return 0;
-    	}
-		File file = new File(path);
-		File[] files = file.listFiles();
-		return files.length;
-	}
-    
+        if (isBlank(path)) {
+            return 0;
+        }
+        File file = new File(path);
+        File[] files = file.listFiles();
+        return files.length;
+    }
+
     /**
-     * @Title: getRootDir
-     * @Description: 获取应用程序根目录，卸载应用程序时，会一并删除该目录
      * @param context
      * @return 返回引用程序根目录
      * @throws Exception
+     * @Title: getRootDir
+     * @Description: 获取应用程序根目录，卸载应用程序时，会一并删除该目录
      */
     public static File getRootDir(Context context) {
-        File rootDir=context.getExternalFilesDir(null);
-        if(rootDir == null)
-            rootDir=context.getFilesDir();
-        if(rootDir == null)
+        File rootDir = context.getExternalFilesDir(null);
+        if (rootDir == null)
+            rootDir = context.getFilesDir();
+        if (rootDir == null)
             Log.w("FileUtils", "FileUtil.getRootDir 获取根目录为 null");
         return rootDir;
     }
-    
+
     /**
-     * @Title: createFile
-     * @Description:根据dir+fileName创建一个文件，不覆盖已存在文件
      * @param dir
      * @param fileName
      * @return
      * @throws IOException
+     * @Title: createFile
+     * @Description:根据dir+fileName创建一个文件，不覆盖已存在文件
      */
     public static File createFile(String dir, String fileName) throws IOException {
         return createFile(new File(dir), fileName, false);
     }
-    
+
     /**
-     * @Title: createFile
-     * @Description:根据dir+fileName创建一个文件，不覆盖已存在文件
      * @param dir
      * @param fileName
      * @return
      * @throws IOException
+     * @Title: createFile
+     * @Description:根据dir+fileName创建一个文件，不覆盖已存在文件
      */
     public static File createFile(File dir, String fileName) throws IOException {
         return createFile(dir, fileName, false);
     }
-    
+
     /**
-     * @Title: createFile
-     * @Description:根据dir+fileName创建一个文件
      * @param dir
      * @param fileName
-     * @param converOld
-     *            是否覆盖已存在的文件
+     * @param converOld 是否覆盖已存在的文件
      * @return
      * @throws IOException
+     * @Title: createFile
+     * @Description:根据dir+fileName创建一个文件
      */
-    public static File createFile(String dir, String fileName, boolean converOld) throws IOException
-    {
+    public static File createFile(String dir, String fileName, boolean converOld) throws IOException {
         return createFile(new File(dir), fileName, converOld);
     }
-    
+
     /**
      * @param dir
      * @param fileName
@@ -584,25 +612,21 @@ public class FileUtils {
      * @return
      * @throws IOException
      */
-    public static File createFile(File dir, String fileName, boolean coverOld) throws IOException
-    {
-        if(dir == null || TextUtils.isEmpty(fileName)){
+    public static File createFile(File dir, String fileName, boolean coverOld) throws IOException {
+        if (dir == null || TextUtils.isEmpty(fileName)) {
             return null;
         }
-        if( !dir.isDirectory()){
+        if (!dir.isDirectory()) {
             Log.w("FileUtils", "FileUtil.getRootDir() dir参数不是文件夹类型");
             return null;
         }
-        if( !dir.exists())
+        if (!dir.exists())
             dir.mkdirs();
-        File createFile=new File(dir, fileName);
-        if( !createFile.exists())
-        {
+        File createFile = new File(dir, fileName);
+        if (!createFile.exists()) {
             createFile.createNewFile();
-        }
-        else
-        {
-            if(coverOld){
+        } else {
+            if (coverOld) {
                 createFile.delete();
                 createFile.createNewFile();
             }
